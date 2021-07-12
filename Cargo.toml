@@ -28,5 +28,5 @@ members = [
 iced = "0.3"
 
 [dependencies]
-iced_native = "0.4"
-iced_graphics = { version = "0.2", features = ["canvas"] }
+iced_native = { version = "0.4", path = "../iced/native" }
+iced_graphics = { version = "0.2", path = "../iced/graphics", features = ["canvas"] }
