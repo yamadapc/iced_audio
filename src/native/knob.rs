@@ -12,7 +12,7 @@ use iced_native::{
 
 use crate::core::{ModulationRange, Normal, NormalParam};
 use crate::native::{text_marks, tick_marks};
-use crate::{IntRange, DEFAULT_ANGLE_MAX, DEFAULT_ANGLE_MIN};
+use crate::{IntRange, KnobAngleRange};
 
 static DEFAULT_SIZE: u16 = 30;
 static DEFAULT_SCALAR: f32 = 0.00385;
@@ -37,6 +37,7 @@ pub struct Knob<'a, Message, Renderer: self::Renderer> {
     mod_range_1: Option<&'a ModulationRange>,
     mod_range_2: Option<&'a ModulationRange>,
     use_radial_interaction: bool,
+    angle_range: KnobAngleRange,
 }
 
 impl<'a, Message, Renderer: self::Renderer> Knob<'a, Message, Renderer> {
@@ -69,6 +70,7 @@ impl<'a, Message, Renderer: self::Renderer> Knob<'a, Message, Renderer> {
             mod_range_1: None,
             mod_range_2: None,
             use_radial_interaction: false,
+            angle_range: KnobAngleRange::default(),
         }
     }
 
@@ -99,6 +101,16 @@ impl<'a, Message, Renderer: self::Renderer> Knob<'a, Message, Renderer> {
         use_radial_interaction: bool,
     ) -> Self {
         self.use_radial_interaction = use_radial_interaction;
+        self
+    }
+
+    /// Use angle range min/max for radial interaction.
+    ///
+    /// Defaults to `Default::default()`.
+    ///
+    /// [`Knob`]: struct.Knob.html
+    pub fn angle_range(mut self, angle_range: KnobAngleRange) -> Self {
+        self.angle_range = angle_range;
         self
     }
 
@@ -217,6 +229,32 @@ impl<'a, Message, Renderer: self::Renderer> Knob<'a, Message, Renderer> {
 
         self.state.normal_param.value = normal.into();
 
+        messages.push((self.on_change)(self.state.normal_param.value));
+    }
+
+    /// Handles a mouse drag event by moving the slider to match the current angle of the cursor
+    /// around the knob
+    fn move_virtual_slider_radially(
+        &mut self,
+        layout: Layout<'_>,
+        cursor_position: Point,
+        messages: &mut Vec<Message>,
+    ) {
+        let center = layout.bounds().center();
+        let dx = cursor_position.x - center.x;
+        let dy = cursor_position.y - center.y;
+        let mut angle = dx.atan2(dy);
+        if angle < 0. {
+            angle = 2. * std::f32::consts::PI + angle;
+        }
+        let angle_range = &self.angle_range;
+        println!("{:?} - angle: {}", angle_range, angle);
+        let angle = 1.
+            - ((angle - angle_range.min())
+                / (angle_range.max() - angle_range.min()));
+        println!(" ===> {}", angle);
+        self.state.continuous_normal = angle;
+        self.state.normal_param.value = Normal::from(angle);
         messages.push((self.on_change)(self.state.normal_param.value));
     }
 }
@@ -345,21 +383,13 @@ where
             Event::Mouse(mouse_event) => match mouse_event {
                 mouse::Event::CursorMoved { .. } => {
                     if self.state.is_dragging && self.use_radial_interaction {
-                        let center = layout.bounds().center();
-                        let dx = cursor_position.x - center.x;
-                        let dy = cursor_position.y - center.y;
-                        let mut angle = dx.atan2(dy);
-                        if angle < 0. {
-                            angle = 2. * std::f32::consts::PI + angle;
-                        }
-                        let angle = 1.
-                            - ((angle - DEFAULT_ANGLE_MIN)
-                                / (DEFAULT_ANGLE_MAX - DEFAULT_ANGLE_MIN));
-                        self.state.continuous_normal = angle;
-                        self.state.normal_param.value = Normal::from(angle);
-                        messages.push((self.on_change)(
-                            self.state.normal_param.value,
-                        ));
+                        self.move_virtual_slider_radially(
+                            layout,
+                            cursor_position,
+                            messages,
+                        );
+
+                        return event::Status::Captured;
                     } else if self.state.is_dragging {
                         let normal_delta = (cursor_position.y
                             - self.state.prev_drag_y)
