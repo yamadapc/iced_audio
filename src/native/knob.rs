@@ -3,17 +3,16 @@
 //! [`NormalParam`]: ../core/normal_param/struct.NormalParam.html
 
 use std::fmt::Debug;
+use std::hash::Hash;
 
 use iced_native::{
     event, keyboard, layout, mouse, Clipboard, Element, Event, Hasher, Layout,
     Length, Point, Rectangle, Size, Widget,
 };
 
-use std::hash::Hash;
-
 use crate::core::{ModulationRange, Normal, NormalParam};
 use crate::native::{text_marks, tick_marks};
-use crate::IntRange;
+use crate::{IntRange, DEFAULT_ANGLE_MAX, DEFAULT_ANGLE_MIN};
 
 static DEFAULT_SIZE: u16 = 30;
 static DEFAULT_SCALAR: f32 = 0.00385;
@@ -37,6 +36,7 @@ pub struct Knob<'a, Message, Renderer: self::Renderer> {
     text_marks: Option<&'a text_marks::Group>,
     mod_range_1: Option<&'a ModulationRange>,
     mod_range_2: Option<&'a ModulationRange>,
+    use_radial_interaction: bool,
 }
 
 impl<'a, Message, Renderer: self::Renderer> Knob<'a, Message, Renderer> {
@@ -68,6 +68,7 @@ impl<'a, Message, Renderer: self::Renderer> Knob<'a, Message, Renderer> {
             text_marks: None,
             mod_range_1: None,
             mod_range_2: None,
+            use_radial_interaction: false,
         }
     }
 
@@ -85,6 +86,19 @@ impl<'a, Message, Renderer: self::Renderer> Knob<'a, Message, Renderer> {
     /// [`Knob`]: struct.Knob.html
     pub fn style(mut self, style: impl Into<Renderer::Style>) -> Self {
         self.style = style.into();
+        self
+    }
+
+    /// Use the cursor position around the knob to control its value.
+    ///
+    /// Defaults to false.
+    ///
+    /// [`Knob`]: struct.Knob.html
+    pub fn use_radial_interaction(
+        mut self,
+        use_radial_interaction: bool,
+    ) -> Self {
+        self.use_radial_interaction = use_radial_interaction;
         self
     }
 
@@ -330,7 +344,23 @@ where
         match event {
             Event::Mouse(mouse_event) => match mouse_event {
                 mouse::Event::CursorMoved { .. } => {
-                    if self.state.is_dragging {
+                    if self.state.is_dragging && self.use_radial_interaction {
+                        let center = layout.bounds().center();
+                        let dx = cursor_position.x - center.x;
+                        let dy = cursor_position.y - center.y;
+                        let mut angle = dx.atan2(dy);
+                        if angle < 0. {
+                            angle = 2. * std::f32::consts::PI + angle;
+                        }
+                        let angle = 1.
+                            - ((angle - DEFAULT_ANGLE_MIN)
+                                / (DEFAULT_ANGLE_MAX - DEFAULT_ANGLE_MIN));
+                        self.state.continuous_normal = angle;
+                        self.state.normal_param.value = Normal::from(angle);
+                        messages.push((self.on_change)(
+                            self.state.normal_param.value,
+                        ));
+                    } else if self.state.is_dragging {
                         let normal_delta = (cursor_position.y
                             - self.state.prev_drag_y)
                             * self.scalar;
