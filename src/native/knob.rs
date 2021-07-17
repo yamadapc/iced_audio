@@ -248,11 +248,9 @@ impl<'a, Message, Renderer: self::Renderer> Knob<'a, Message, Renderer> {
             angle = 2. * std::f32::consts::PI + angle;
         }
         let angle_range = &self.angle_range;
-        println!("{:?} - angle: {}", angle_range, angle);
         let angle = 1.
             - ((angle - angle_range.min())
                 / (angle_range.max() - angle_range.min()));
-        println!(" ===> {}", angle);
         self.state.continuous_normal = angle;
         self.state.normal_param.value = Normal::from(angle);
         messages.push((self.on_change)(self.state.normal_param.value));
