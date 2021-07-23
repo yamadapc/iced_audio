@@ -64,10 +64,8 @@ impl<'a, Message, Renderer: self::Renderer> HSlider<'a, Message, Renderer> {
             scalar: DEFAULT_SCALAR,
             wheel_scalar: DEFAULT_WHEEL_SCALAR,
             modifier_scalar: DEFAULT_MODIFIER_SCALAR,
-            modifier_keys: keyboard::Modifiers {
-                control: true,
-                ..Default::default()
-            },
+            modifier_keys: keyboard::Modifiers::default()
+                | keyboard::Modifiers::CTRL,
             width: Length::Fill,
             height: Length::from(Length::Units(DEFAULT_HEIGHT)),
             style: Renderer::Style::default(),
@@ -204,7 +202,9 @@ impl<'a, Message, Renderer: self::Renderer> HSlider<'a, Message, Renderer> {
         messages: &mut Vec<Message>,
         mut normal_delta: f32,
     ) {
-        if self.state.pressed_modifiers.matches(self.modifier_keys) {
+        if keyboard::Modifiers::empty()
+            != self.state.pressed_modifiers & self.modifier_keys
+        {
             normal_delta *= self.modifier_scalar;
         }
 

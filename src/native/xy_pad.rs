@@ -52,10 +52,8 @@ impl<'a, Message, Renderer: self::Renderer> XYPad<'a, Message, Renderer> {
             state,
             on_change: Box::new(on_change),
             modifier_scalar: DEFAULT_MODIFIER_SCALAR,
-            modifier_keys: keyboard::Modifiers {
-                control: true,
-                ..Default::default()
-            },
+            modifier_keys: keyboard::Modifiers::default()
+                | keyboard::Modifiers::CTRL,
             size: Length::Fill,
             style: Renderer::Style::default(),
         }
@@ -290,10 +288,9 @@ where
                                 - self.state.prev_drag_y)
                                 / bounds_size;
 
-                            if self
-                                .state
-                                .pressed_modifiers
-                                .matches(self.modifier_keys)
+                            if keyboard::Modifiers::empty()
+                                != self.state.pressed_modifiers
+                                    & self.modifier_keys
                             {
                                 movement_x *= self.modifier_scalar;
                                 movement_y *= self.modifier_scalar;
