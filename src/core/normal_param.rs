@@ -24,11 +24,28 @@ pub struct NormalParam {
     pub default: Normal,
 }
 
+impl NormalParam {
+    /// Create a new param with [`Normal`] as the value and default
+    pub fn new(value: Normal) -> Self {
+        NormalParam {
+            value,
+            default: value,
+        }
+    }
+}
+
 impl Default for NormalParam {
     fn default() -> Self {
         Self {
             value: Normal::min(),
             default: Normal::min(),
         }
+    }
+}
+
+impl From<f32> for NormalParam {
+    fn from(value: f32) -> Self {
+        let normal = Normal::new(value);
+        Self::new(normal)
     }
 }
