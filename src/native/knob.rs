@@ -275,6 +275,12 @@ pub struct State {
     text_marks_cache: crate::graphics::text_marks::PrimitiveCache,
 }
 
+impl Default for State {
+    fn default() -> Self {
+        Self::new(Default::default())
+    }
+}
+
 impl State {
     /// Creates a new [`Knob`] state.
     ///
