@@ -2,9 +2,7 @@ use super::PrimitiveCache;
 use crate::native::text_marks;
 use crate::style::text_marks::{Align, Placement, Style};
 
-use iced_graphics::{
-    HorizontalAlignment, Primitive, Rectangle, VerticalAlignment,
-};
+use iced_graphics::{alignment, Primitive, Rectangle};
 
 fn draw_aligned(
     primitives: &mut Vec<Primitive>,
@@ -13,7 +11,7 @@ fn draw_aligned(
     text_marks: &text_marks::Group,
     style: &Style,
     inverse: bool,
-    align: HorizontalAlignment,
+    align: alignment::Horizontal,
 ) {
     let color = style.color;
     let font = style.font;
@@ -35,7 +33,7 @@ fn draw_aligned(
                 color,
                 font,
                 horizontal_alignment: align,
-                vertical_alignment: VerticalAlignment::Center,
+                vertical_alignment: alignment::Vertical::Center,
             });
         }
     } else {
@@ -53,7 +51,7 @@ fn draw_aligned(
                 color,
                 font,
                 horizontal_alignment: align,
-                vertical_alignment: VerticalAlignment::Center,
+                vertical_alignment: alignment::Vertical::Center,
             });
         }
     }
@@ -97,7 +95,7 @@ pub fn draw_vertical_text_marks(
                             text_marks,
                             style,
                             inverse,
-                            HorizontalAlignment::Left,
+                            alignment::Horizontal::Left,
                         );
                         draw_aligned(
                             &mut primitives,
@@ -106,7 +104,7 @@ pub fn draw_vertical_text_marks(
                             text_marks,
                             style,
                             inverse,
-                            HorizontalAlignment::Right,
+                            alignment::Horizontal::Right,
                         );
                     } else {
                         draw_aligned(
@@ -116,7 +114,7 @@ pub fn draw_vertical_text_marks(
                             text_marks,
                             style,
                             inverse,
-                            HorizontalAlignment::Right,
+                            alignment::Horizontal::Right,
                         );
                         draw_aligned(
                             &mut primitives,
@@ -125,7 +123,7 @@ pub fn draw_vertical_text_marks(
                             text_marks,
                             style,
                             inverse,
-                            HorizontalAlignment::Left,
+                            alignment::Horizontal::Left,
                         );
                     }
 
@@ -145,7 +143,7 @@ pub fn draw_vertical_text_marks(
                             text_marks,
                             style,
                             inverse,
-                            HorizontalAlignment::Left,
+                            alignment::Horizontal::Left,
                         );
                     } else {
                         draw_aligned(
@@ -155,7 +153,7 @@ pub fn draw_vertical_text_marks(
                             text_marks,
                             style,
                             inverse,
-                            HorizontalAlignment::Right,
+                            alignment::Horizontal::Right,
                         );
                     }
 
@@ -175,7 +173,7 @@ pub fn draw_vertical_text_marks(
                             text_marks,
                             style,
                             inverse,
-                            HorizontalAlignment::Right,
+                            alignment::Horizontal::Right,
                         );
                     } else {
                         draw_aligned(
@@ -185,7 +183,7 @@ pub fn draw_vertical_text_marks(
                             text_marks,
                             style,
                             inverse,
-                            HorizontalAlignment::Left,
+                            alignment::Horizontal::Left,
                         );
                     }
 
@@ -206,7 +204,7 @@ pub fn draw_vertical_text_marks(
                                 text_marks,
                                 style,
                                 inverse,
-                                HorizontalAlignment::Left,
+                                alignment::Horizontal::Left,
                             );
                         }
                         Align::End => {
@@ -217,7 +215,7 @@ pub fn draw_vertical_text_marks(
                                 text_marks,
                                 style,
                                 inverse,
-                                HorizontalAlignment::Right,
+                                alignment::Horizontal::Right,
                             );
                         }
                         Align::Center => {
@@ -228,7 +226,7 @@ pub fn draw_vertical_text_marks(
                                 text_marks,
                                 style,
                                 inverse,
-                                HorizontalAlignment::Center,
+                                alignment::Horizontal::Center,
                             );
                         }
                     }

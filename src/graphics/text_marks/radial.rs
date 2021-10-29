@@ -2,9 +2,7 @@ use super::PrimitiveCache;
 use crate::native::text_marks;
 use crate::style::text_marks::Style;
 
-use iced_graphics::{
-    HorizontalAlignment, Point, Primitive, Rectangle, VerticalAlignment,
-};
+use iced_graphics::{alignment, Point, Primitive, Rectangle};
 
 /// Draws text marks around an arc.
 ///
@@ -82,8 +80,8 @@ pub fn draw_radial_text_marks(
                     },
                     color,
                     font,
-                    horizontal_alignment: HorizontalAlignment::Center,
-                    vertical_alignment: VerticalAlignment::Center,
+                    horizontal_alignment: alignment::Horizontal::Center,
+                    vertical_alignment: alignment::Vertical::Center,
                 });
             }
 
